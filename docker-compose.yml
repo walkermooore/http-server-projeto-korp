@@ -1,18 +1,16 @@
 services:
 
   http-server-projeto-korp:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: http-server-projeto-korp
-    networks:
-      - korp-network
+
+    build: .
     expose:
       - "8080"
+    networks:
+      - korp-network
 
   nginx:
-    image: nginx:latest
-    container_name: nginx
+
+    image: nginx
     ports:
       - "80:80"
     volumes:
@@ -22,6 +20,26 @@ services:
     networks:
       - korp-network
 
+
+  prometheus:
+
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - korp-network
+
+  grafana:
+
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - korp-network
+
 networks:
+
   korp-network:
     driver: bridge
