@@ -2,11 +2,14 @@ package handlers
 
 import (
 	"encoding/json"
+	"http-server-projeto-korp/metrics"
 	"http-server-projeto-korp/services"
 	"net/http"
 )
 
 func ProjetoKorp(w http.ResponseWriter, req *http.Request) {
+
+	metrics.RequestsTotal.Inc()
 
 	if req.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
