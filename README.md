@@ -1,4 +1,4 @@
-# http-server-projeto-korp
+# Projeto Korp
 
 🧭 **1. Visão geral do projeto**
 
