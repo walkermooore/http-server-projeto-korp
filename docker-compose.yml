@@ -1,0 +1,27 @@
+services:
+
+  http-server-projeto-korp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: http-server-projeto-korp
+    networks:
+      - korp-network
+    expose:
+      - "8080"
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    depends_on:
+      - http-server-projeto-korp
+    networks:
+      - korp-network
+
+networks:
+  korp-network:
+    driver: bridge
