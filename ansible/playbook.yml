@@ -1,0 +1,71 @@
+---
+- name: Provisionar ambiente Projeto Korp
+  hosts: local
+  become: true
+
+  vars:
+    projeto_dir: "{{ playbook_dir }}/.."
+
+  tasks:
+
+    - name: Atualizar cache apt
+      apt:
+        update_cache: yes
+
+    - name: Verificar se Docker existe
+      command: docker --version
+      register: docker_check
+      ignore_errors: true
+      changed_when: false
+
+    - name: Instalar Docker apenas se necessário
+      apt:
+        name:
+          - docker.io
+        state: present
+        update_cache: yes
+      when: docker_check.rc != 0
+
+    - name: Verificar se docker compose existe
+      command: docker compose version
+      register: compose_check
+      ignore_errors: true
+      changed_when: false
+
+    - name: Instalar plugin docker compose
+      apt:
+        name:
+          - docker-compose-v2
+        state: present
+      when: compose_check.rc != 0
+
+    - name: Iniciar Docker
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Criar rede Docker
+      shell: |
+        docker network inspect korp-network >/dev/null 2>&1 || \
+        docker network create korp-network
+
+    - name: Executar docker compose
+      shell: docker compose up -d --build
+      args:
+        chdir: "{{ projeto_dir }}"
+
+    - name: Esperar containers iniciarem
+      pause:
+        seconds: 15
+
+    - name: Validar endpoint
+      uri:
+        url: http://localhost/projeto-korp
+        method: GET
+        return_content: true
+      register: resposta
+
+    - name: Mostrar resposta
+      debug:
+        var: resposta.content
